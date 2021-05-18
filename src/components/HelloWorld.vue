@@ -33,11 +33,72 @@
 </template>
 
 <script>
+//uso de firebase
+import firebase from 'firebase/app'
+import 'firebase/app'
+import 'firebase/messaging'
+
+//uso de axios
+import axios from 'axios'
+
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
-  }
+  },
+  methods:{
+    salvarTokenNotificacion(token){
+      const token_autorizacion = "2db40115a845ef599dd844135fe05efa34344085"
+      const registrar_token_url = 'http://localhost:8000/registrar-notificacion-token/'
+      const payload = {
+        registration_id: token,
+        type: 'web'
+      }
+      //uso de axios
+      axios.post(registrar_token_url,payload,{
+        headers: {
+          'Authorization': `Token ${token_autorizacion}`
+        },
+      })
+      .then((response) => {
+        console.log('Token de notificacion guardado de manera satisfactoria.')
+        console.log(response.data)
+      })
+      .catch((error)=>{
+        console.log('No se pudo salval el token')
+      })
+    }
+  },
+  mounted(){
+    var config = {
+      apiKey: "AIzaSyCBlCCyd5wBFkLgn7E-hQfLqRLxj9NtB8o",
+      authDomain: "notificaciones-1784b.firebaseapp.com",
+      projectId: "notificaciones-1784b",
+      storageBucket: "notificaciones-1784b.appspot.com",
+      messagingSenderId: "84796054027",
+      appId: "1:84796054027:web:ee8f55a92bea6c2706450e",
+      measurementId: "G-0L90RNQKYY"
+    }
+
+    firebase.initializeApp(config)
+    const messaging = firebase.messaging()
+    messaging.usePublicVapidKey("BNB347r3tkMxI7GXmg2DKQhmvV6PaK5A90JCrddIr9SlALWcV7WLumTOCQmSMd9CfoprZpWcheES1PNkxMp5MoE")
+
+    messaging.requestPermission()
+    .then(() => {
+      console.log('Notification permission granted.')
+      messaging.getToken().then((token) => {
+        console.log('New token created: ', token)
+        this.salvarTokenNotificacion(token)
+      })
+    })
+    .catch((err) => {
+      console.log('Unable to get permission to notify.', err)
+    })
+
+  },
+
 }
 </script>
 
